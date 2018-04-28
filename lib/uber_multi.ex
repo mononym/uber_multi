@@ -19,6 +19,8 @@ defmodule UberMulti do
   '''
 
   Obviously this is very contrived, but shows how you can easily combine non-multi functions together without having to wrap all the calls yourself and manually extract the results for the next one in the chain.
+
+  Another change is that the 'run' methods will also automatically wrap the responses from any methods they call that do not conform to the two element tuple response pattern. If a method returns '{:ok, term()}' or '{:error, term()}' the response will be used as is. Otherwise the response will be wrapped in a tuple like so: '{:ok, <response goes here>}'
   """
 
   alias Ecto.Multi
@@ -76,6 +78,7 @@ defmodule UberMulti do
       extracted_args = extract_args(keys, changes)
 
       apply(run, extracted_args)
+      |> maybe_wrap_response()
     end)
   end
 
@@ -96,9 +99,20 @@ defmodule UberMulti do
       extracted_args = extract_args(keys, changes)
 
       apply(module, function, extracted_args ++ args)
+      |> maybe_wrap_response()
     end)
   end
 
+  @spec maybe_wrap_response(response :: term) :: {:ok, term()} | {:error, term()}
+  defp maybe_wrap_response(response) do
+    if is_tuple(response) and tuple_size(response) == 2 and elem(response, 0) in [:ok, :error] do
+      response
+    else
+      {:ok, response}
+    end
+  end
+
+  @spec extract_args(keys :: term() | [term()], changes :: map()) :: [term()]
   defp extract_args(keys, changes) do
     keys = List.wrap(keys) |> Enum.reverse()
     Enum.reduce(keys, [], fn key, args ->
