@@ -104,13 +104,9 @@ defmodule UberMulti do
   end
 
   @spec maybe_wrap_response(response :: term) :: {:ok, term()} | {:error, term()}
-  defp maybe_wrap_response(response) do
-    if is_tuple(response) and tuple_size(response) == 2 and elem(response, 0) in [:ok, :error] do
-      response
-    else
-      {:ok, response}
-    end
-  end
+  defp maybe_wrap_response({:ok, _} = response), do: response
+  defp maybe_wrap_response({:error, _} = response), do: response
+  defp maybe_wrap_response(response), do: {:ok, response}
 
   @spec extract_args(keys :: term() | [term()], changes :: map()) :: [term()]
   defp extract_args(keys, changes) do
