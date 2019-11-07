@@ -1,6 +1,6 @@
 # UberMulti
 
-**TODO: Add description**
+A helper for 'Ecto.Multi.run/3' that facilitates calling functions not written for Ecto.Multi.
 
 ## Installation
 
