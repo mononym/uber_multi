@@ -10,7 +10,7 @@ defmodule UberMulti do
 
   The second difference is in the function that will be run when the Multi is executed. Given that the changes list is
   being preprocessed into a list of parameters to pass to the function, it will not need to take in the list of changes
-  as normal, but simply take in the list of parameters it expects to perform its function.
+  as normal, but simply take in the parameters it expects to perform its function.
 
   So an UberMulti call which uses the following function:
   '''
@@ -50,12 +50,16 @@ defmodule UberMulti do
   @typedoc "A callback function to call with the parameters extracted from the changes map."
   @type run :: function()
 
+  @typedoc "Whether or not to trust the result by default if it does not come wrapped in a result tuple."
+  @type trust_result :: boolean() | fun()
+
   @doc """
   Adds a function to run as part of the Multi.
 
   By default, functions which do not wrap their results in success tuples have their results returned as a successful
   call. By providing `false` as the last argument this behaviour is changed and results will be wrapped in an error
-  tuple instead.
+  tuple instead. Optionally, for finer grained control, a function which takes the result and returns a tagged value
+  can be passed in as the last parameter instead of a boolean value.
 
   ## Examples
 
@@ -65,12 +69,16 @@ defmodule UberMulti do
       #Ecto.Multi{}
 
       Multi.new()
-      |> Multi.run(:list_stars, fn(_) -> Astronomy.list_stars("Milky Way") end)
+      |> UberMulti.run(:list_stars, ["Milky Way"], &Astronomy.list_stars/1)
       |> UberMulti.run(:reverse, [:list_stars], &Enum.reverse/1)
-      |> UberMulti.run(:cannon, [:reverse], &Astronomy.classify_stars/1)
+      |> UberMulti.run(:classify,
+        [:reverse],
+        &Astronomy.classify_stars/1,
+        # Assume result is ok for previty
+        & {:ok, Enum.all?(&1, fn star -> star.class in ~w"O B A F G K M")})
       |> Repo.transaction()
   """
-  @spec run(multi, name, keys, run, bool()) :: multi
+  @spec run(multi, name, keys, run, trust_result) :: multi
   def run(multi, name, keys, run, trust_result \\ false) do
     Multi.run(multi, name, fn _, changes ->
       extracted_args = extract_args(keys, changes)
@@ -80,8 +88,9 @@ defmodule UberMulti do
     end)
   end
 
-  @spec maybe_wrap_response(response :: term, trust_result :: bool) ::
+  @spec maybe_wrap_response(response :: term, trust_result) ::
           {:ok, term()} | {:error, term()}
+  defp maybe_wrap_response(response, fun) when is_function(fun), do: fun.(response)
   defp maybe_wrap_response({:ok, _} = response, _), do: response
   defp maybe_wrap_response({:error, _} = response, _), do: response
   defp maybe_wrap_response(response, true), do: {:ok, response}
@@ -91,9 +100,8 @@ defmodule UberMulti do
   defp extract_args(keys, changes) do
     keys
     |> List.wrap()
-    |> Enum.reverse()
-    |> Enum.reduce([], fn key, args ->
-      [Map.get(changes, key, key) | args]
+    |> Enum.map(fn key ->
+      Map.get(changes, key, key)
     end)
   end
 end

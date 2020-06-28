@@ -7,7 +7,7 @@ defmodule UberMulti.MixProject do
       deps: deps(),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      version: "0.1.0"
+      version: "1.0.0"
     ]
   end
 
@@ -21,7 +21,7 @@ defmodule UberMulti.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.2.5"}
+      {:ecto, "> 2.0.0"}
     ]
   end
 end
