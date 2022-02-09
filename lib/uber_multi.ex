@@ -74,7 +74,7 @@ defmodule UberMulti do
       |> UberMulti.run(:classify,
         [:reverse],
         &Astronomy.classify_stars/1,
-        # Assume result is ok for previty
+        # Assume result is ok for brevity
         & {:ok, Enum.all?(&1, fn star -> star.class in ~w"O B A F G K M")})
       |> Repo.transaction()
   """
