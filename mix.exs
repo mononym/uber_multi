@@ -31,12 +31,11 @@ defmodule UberMulti.MixProject do
   defp description() do
     "A helper for 'Ecto.Multi.run/3' that facilitates calling functions not written for Ecto.Multi."
   end
-  
+
   defp package() do
     [
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/mononym/uber_multi"}
     ]
   end
-  
 end

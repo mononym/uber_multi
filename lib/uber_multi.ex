@@ -13,16 +13,16 @@ defmodule UberMulti do
   as normal, but simply take in the parameters it expects to perform its function.
 
   So an UberMulti call which uses the following function:
-  '''
+  ```
   def add_things(thing1, thing2) do
     {:ok, thing1 + thing2}
   end
-  '''
+  ```
 
   Might look like:
-  '''
+  ```
   UberMulti.run(multi, :add_things, [:get_thing1, :get_thing2], &add_things/2)
-  '''
+  ```
 
   Obviously this is very contrived, but shows how you can easily combine non-multi and multi-designed functions without
   having to wrap all the calls yourself and manually extract the results for the next one in the chain.
