@@ -5,6 +5,8 @@ defmodule UberMulti.MixProject do
     [
       app: :uber_multi,
       deps: deps(),
+      description: description(),
+      package: package(),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       version: "1.0.0"
@@ -24,4 +26,16 @@ defmodule UberMulti.MixProject do
       {:ecto, "> 2.0.0"}
     ]
   end
+
+  defp description() do
+    "A helper for 'Ecto.Multi.run/3' that facilitates calling functions not written for Ecto.Multi."
+  end
+  
+  defp package() do
+    [
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/mononym/uber_multi"}
+    ]
+  end
+  
 end
