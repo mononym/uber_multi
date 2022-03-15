@@ -9,7 +9,7 @@ defmodule UberMulti.MixProject do
       package: package(),
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      version: "1.0.0"
+      version: "1.0.1"
     ]
   end
 
